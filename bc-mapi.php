@@ -79,6 +79,7 @@ class BCMAPI
 		'playlist',
 		'video'
 	);
+	private $proxy = array();
 
 	/**
 	 * The constructor for the BCMAPI class.
@@ -1360,6 +1361,23 @@ class BCMAPI
 		}
 
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+		if (isset($this->proxy['host'])) {
+			curl_setopt($curl, CURLOPT_PROXY, $this->proxy['host']);
+		}
+		if (isset($this->proxy['port'])) {
+			curl_setopt($curl, CURLOPT_PROXYPORT, $this->proxy['port']);
+		}
+		if (isset($this->proxy['type'])) {
+			curl_setopt($curl, CURLOPT_PROXYTYPE, $this->proxy['type']);
+		}
+		if (isset($this->proxy['auth'])) {
+			curl_setopt($curl, CURLOPT_PROXYAUTH, $this->proxy['auth']);
+		}
+		if (isset($this->proxy['userpwd'])) {
+			curl_setopt($curl, CURLOPT_PROXYUSERPWD, $this->proxy['userpwd']);
+		}
+
 		$response = curl_exec($curl);
 
 		$this->api_calls++;
@@ -1545,6 +1563,30 @@ class BCMAPIException extends Exception
 
 		parent::__construct($error, $error_code);
 	}
+
+	/**
+	 * Sets CURL proxy for requests
+	 * @param string [$host] Proxy host URI
+	 * @param string [$port] Proxy port
+	 * @param int [$type] Proxy type, available values: CURLPROXY_HTTP, CURLPROXY_SOCKS4, CURLPROXY_SOCKS5
+	 * @param null|string [$auth] Proxy authentication, available values: null, CURLAUTH_BASIC, CURLAUTH_NTLM
+	 * @param null|string $userpwd Proxy credentials formatted as "[username]:[password]"
+	 */
+	public function setProxy($host, $port, $type = CURLPROXY_HTTP, $auth = null, $userpwd = null)
+	{
+		$this->proxy['host'] = $host;
+		$this->proxy['port'] = $port;
+		$this->proxy['type'] = $type;
+
+		if (!is_null($auth)) {
+			$this->proxy['auth'] = $auth;
+		}
+
+		if (!is_null($userpwd)) {
+			$this->proxy['userpwd'] = $userpwd;
+		}
+	}
+
 }
 
 class BCMAPIApiError extends BCMAPIException{}
